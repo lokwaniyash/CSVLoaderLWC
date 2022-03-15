@@ -1,0 +1,169 @@
+<template>
+  <template if:true={records}>
+    <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+      <tr class="slds-line-height_reset">
+        <th class="" scope="col">
+          <div class="slds-truncate" title="First Name">First Name</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Last Name">Last Name</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Username">Username</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Email">Email</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Alias">Alias</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Employee Id">Employee Id</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Federation Id">Federation Id</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Profile Name">Profile Name</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Status">Status</div>
+        </th>
+      </tr>
+      <template for:each={records} for:item="record">
+        <tr key={record.Username}>
+          <td data-label="First Name">
+            <div class="slds-truncate" title={record.FirstName}>
+              {record.FirstName}
+            </div>
+          </td>
+          <td data-label="Last Name">
+            <div class="slds-truncate" title={record.LastName}>
+              {record.LastName}
+            </div>
+          </td>
+          <td data-label="Username">
+            <div class="slds-truncate" title={record.Username}>
+              {record.Username}
+            </div>
+          </td>
+          <td data-label="Email">
+            <div class="slds-truncate" title={record.Email}>{record.Email}</div>
+          </td>
+          <td data-label="Alias">
+            <div class="slds-truncate" title={record.Alias}>{record.Alias}</div>
+          </td>
+          <td data-label="Employee Number">
+            <div class="slds-truncate" title={record.EmployeeNumber}>
+              {record.EmployeeNumber}
+            </div>
+          </td>
+          <td data-label="Federation Id">
+            <div class="slds-truncate" title={record.FederationIdentifier}>
+              {record.FederationIdentifier}
+            </div>
+          </td>
+          <td data-label="ProfileId">
+            <div class="slds-truncate" title={record.ProfileId}>
+              {record.ProfileName}
+            </div>
+          </td>
+          <td data-label="Status">
+            <div title={record.status}>
+              {record.status}
+              <!-- <div style="padding-left:2rem;padding-top:5rem;position:relative"> -->
+              <button
+                class="slds-button slds-button_icon slds-button slds-button_icon"
+                aria-describedby="help"
+                aria-disabled="true"
+                title="Help"
+                data-id={record.index}
+                onclick={showErrors}
+              >
+                <svg class="slds-button__icon" aria-hidden="true">
+                  <use
+                    xlink:href="/_slds/icons/utility-sprite/svg/symbols.svg#info"
+                  ></use>
+                </svg>
+                <span class="slds-assistive-text">Help</span>
+              </button>
+
+              <section
+                aria-describedby="dialog-body-id-112"
+                aria-labelledby="dialog-heading-id-5"
+                class="slds-popover slds-popover_prompt slds-right slds-popover_brand slds-popover_brand-right"
+                role="dialog"
+                data-index={record.index}
+                style="display: none; white-space: normal; transform: translate(-80%, 0); position: absolute;"
+              >
+                <button
+                  class="slds-button slds-button_icon slds-button_icon-small slds-float_right slds-popover__close"
+                  title="Close dialog"
+                  onclick={hideErrors}
+                  data-id={record.index}
+                >
+                  <svg class="slds-button__icon" aria-hidden="true">
+                    <use
+                      xlink:href="/_slds/icons/utility-sprite/svg/symbols.svg#close"
+                    ></use>
+                  </svg>
+                  <span class="slds-assistive-text">Close dialog</span>
+                </button>
+                <div class="slds-popover__body">
+                  <div class="slds-media">
+                    <div class="slds-media__body">
+                      <div class="slds-media">
+                        <!-- <div class="slds-media__figure"> -->
+                        <!-- <span class="slds-icon_container">
+                              <svg class="slds-icon slds-icon_small slds-icon-text-default slds-popover__icon" aria-hidden="true">
+                                <use xlink:href="/_s/icons/utility-sprite/svg/symbols.svg#prompt"></use>
+                              </svg>
+                              <span class="slds-assistive-text"></span>
+                            </span> -->
+                        <!-- </div> -->
+                        <div class="slds-media__body">
+                          <h2 class="slds-popover_prompt__heading">Status</h2>
+                          <p>{record.errorString}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+              <!-- <div class="slds-popover slds-popover_tooltip slds-nubbin_bottom-left" role="tooltip" style="position:absolute;top:-4px;left:15px">
+                  <div class="slds-popover__body">{record.errorString}</div>
+                </div> -->
+              <!-- </div> -->
+            </div>
+          </td>
+        </tr>
+      </template>
+    </table>
+    <lightning-button
+              variant="neutral"
+              label="Close"
+              title="Close Modal"
+              class="slds-m-left_x-small"
+              onclick={close}
+            ></lightning-button>
+            <lightning-button
+              variant="neutral"
+              label="Download Report"
+              title="Download This Report"
+              class="slds-m-left_x-small"
+              onclick={download}
+            ></lightning-button>
+            <!-- <a
+              id="lnkDwnldLnk"
+              style="display: none"
+              data-id="downloadUserReport1"
+            ></a> -->
+            <lightning-button
+              variant="brand"
+              label="Add Permission Set(s) and Group(s)"
+              title="Brand action"
+              class="slds-m-left_x-small"
+              onclick={navToPermComp}
+            ></lightning-button>
+  </template>
+</template>

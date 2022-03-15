@@ -1,0 +1,219 @@
+<template>
+  <template if:true={records}>
+    <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+      <tr class="slds-line-height_reset">
+        <th class="" scope="col">
+          <div class="slds-truncate" title="First Name">First Name</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Last Name">Last Name</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Username">Username</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Email">Email</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Alias">Alias</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Employee Id">Employee Id</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Federation Id">Federation Id</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Profile Name">Profile Name</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Permission Set">Permission Set</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Group">Group</div>
+        </th>
+      </tr>
+      <template for:each={records} for:item="record">
+        <tr key={record.Username}>
+          <td data-label="First Name">
+            <div class="slds-truncate" title={record.FirstName}>
+              {record.FirstName}
+            </div>
+          </td>
+          <td data-label="Last Name">
+            <div class="slds-truncate" title={record.LastName}>
+              {record.LastName}
+            </div>
+          </td>
+          <td data-label="Username">
+            <div class="slds-truncate" title={record.Username}>
+              {record.Username}
+            </div>
+          </td>
+          <td data-label="Email">
+            <div class="slds-truncate" title={record.Email}>{record.Email}</div>
+          </td>
+          <td data-label="Alias">
+            <div class="slds-truncate" title={record.Alias}>{record.Alias}</div>
+          </td>
+          <td data-label="Employee Number">
+            <div class="slds-truncate" title={record.EmployeeNumber}>
+              {record.EmployeeNumber}
+            </div>
+          </td>
+          <td data-label="Federation Id">
+            <div class="slds-truncate" title={record.FederationIdentifier}>
+              {record.FederationIdentifier}
+            </div>
+          </td>
+          <td data-label="ProfileId">
+            <div class="slds-truncate" title={record.ProfileName}>
+              {record.ProfileName}
+            </div>
+          </td>
+          <td data-label="Permisson Set">
+            <div>
+              <!-- <lightning-combobox
+                  name="field"
+                  variant = "label-hidden"
+                  placeholder="Please Select a Permission Set"
+                  options={tempPermOptions}
+                  onchange={handleChangePerms}
+                  data-field={record.index}
+                  style="overflow: auto; position: relative"
+                >
+                </lightning-combobox> -->
+              <c-multi-select-picklist
+                options={tempPermOptions}
+                onvaluechange={handleChangePerms}
+                data-field={record.index}
+                type="perms"
+                colors={colors}
+              ></c-multi-select-picklist>
+            </div>
+          </td>
+          <td data-label="Group">
+            <div>
+              <!-- <lightning-combobox
+                  name="field"
+                  variant = "label-hidden"
+                  placeholder="Please Select a Group"
+                  options={tempGroupOptions}
+                  onchange={handleChangeGroup}
+                  data-field={record.index}
+                  style="overflow: auto; position: relative"
+                >
+                </lightning-combobox> -->
+              <c-multi-select-picklist
+                options={tempGroupOptions}
+                onvaluechange={handleChangeGroups}
+                data-field={record.index}
+                type="groups"
+                colors={colors}
+              ></c-multi-select-picklist>
+            </div>
+          </td>
+        </tr>
+      </template>
+    </table>
+    <template if:true={copyModal}>
+      <!-- Modal/Popup Box LWC starts here -->
+      <section
+        role="dialog"
+        tabindex="-1"
+        aria-labelledby="modal-heading-01"
+        aria-modal="true"
+        aria-describedby="modal-content-id-1"
+        class="slds-modal slds-fade-in-open"
+      >
+        <div class="slds-modal__container">
+          <!-- Modal/Popup Box LWC header here -->
+          <header class="slds-modal__header">
+            <button
+              class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+              title="Close"
+              onclick={closeModal}
+            >
+              <lightning-icon
+                icon-name="utility:close"
+                alternative-text="close"
+                variant="inverse"
+                size="small"
+              ></lightning-icon>
+              <span class="slds-assistive-text">Close</span>
+            </button>
+            <h2
+              id="modal-heading-01"
+              class="slds-text-heading_medium slds-hyphenate"
+            >
+              Copy the Selected Permissions Set(s) and Group(s) to all User
+              Records in the Grid
+            </h2>
+          </header>
+          <!-- Modal/Popup Box LWC body starts here -->
+          <div
+            class="slds-modal__content slds-p-around_medium"
+            id="modal-content-id-1"
+          >
+            <!-- records -->
+            Permission Sets
+            <c-multi-select-picklist
+              options={tempPermOptions}
+              onvaluechange={handleCopyPerms}
+              copy={isTrue}
+              colors={colors}
+            ></c-multi-select-picklist>
+
+            Public Groups
+            <c-multi-select-picklist
+              options={tempGroupOptions}
+              onvaluechange={handleCopyGroups}
+              copy={isTrue}
+              colors={colors}
+            ></c-multi-select-picklist>
+          </div>
+          <!-- Modal/Popup Box LWC footer starts here -->
+          <footer class="slds-modal__footer">
+            <lightning-button
+              variant="neutral"
+              label="Close"
+              title="Close Modal"
+              class="slds-m-left_x-small"
+              onclick={closeModal}
+            ></lightning-button>
+            <lightning-button
+              variant="brand"
+              label="Done"
+              title="Brand action"
+              class="slds-m-left_x-small"
+              onclick={handleCopy}
+            ></lightning-button>
+          </footer>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+    <lightning-button
+      variant="neutral"
+      label="Close"
+      title="Close Modal"
+      class="slds-m-left_x-small"
+      onclick={closePermGrid}
+    ></lightning-button>
+    <lightning-button
+      variant="neutral"
+      label="Copy To All"
+      title="Copy To All"
+      class="slds-m-left_x-small"
+      onclick={copyToAllWindow}
+    ></lightning-button>
+    <a style="display: none" data-id="downloadUserReport1"></a>
+    <lightning-button
+      variant="brand"
+      label="Update Users"
+      title="Brand action"
+      class="slds-m-left_x-small"
+      onclick={updateRecords}
+    ></lightning-button>
+  </template>
+</template>

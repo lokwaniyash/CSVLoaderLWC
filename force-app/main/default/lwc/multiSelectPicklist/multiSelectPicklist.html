@@ -1,0 +1,103 @@
+<template>
+  <div class="slds-form-element">
+    <!-- <label class="slds-form-element__label">{label}</label> -->
+    <div class="slds-form-element__control">
+      <div class="slds-combobox_container">
+        <div
+          aria-expanded="false"
+          aria-haspopup="listbox"
+          class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click"
+          role="combobox"
+        >
+          <div
+            class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right"
+            role="none"
+          >
+            <input
+              aria-controls="listbox-id-1"
+              class="slds-input slds-combobox__input"
+              data-id="combobox-id-2"
+              onclick={handleClick}
+              role="textbox"
+              value={inputValue}
+              readonly
+              type="text"
+              onblur={handleBlur}
+            />
+            <div class="slds-input__icon-group slds-input__icon-group_right">
+              <lightning-icon
+                class="slds-input__icon slds-input__icon_right"
+                icon-name="utility:down"
+                size="xx-small"
+              ></lightning-icon>
+            </div>
+          </div>
+          <div
+            class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid"
+            id="5"
+            onmouseenter={handleMouseEnter}
+            onmouseleave={handleMouseleave}
+            role="listbox"
+            style="overflow: auto; position: relative"
+          >
+            <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+              <template if:true={inputOptions}>
+                <template for:each={inputOptions} for:item="option">
+                  <li
+                    class="slds-listbox__item"
+                    data-selected="false"
+                    data-id={option.value}
+                    data-value={option.value}
+                    data-label={option.label}
+                    key={option.value}
+                    role="presentation"
+                    onclick={handleSelection}
+                  >
+                    <div
+                      class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small"
+                      role="option"
+                    >
+                      <span class="slds-media__figure">
+                        <lightning-icon
+                          class="slds-icon-utility-check slds-current-color slds-listbox__icon-selected slds-icon_container"
+                          icon-name="utility:check"
+                          size="x-small"
+                        >
+                        </lightning-icon>
+                      </span>
+                      <span class="slds-media__body">
+                        <span class="slds-truncate" title={option.label}
+                          >{option.label}</span
+                        >
+                      </span>
+                    </div>
+                  </li>
+                </template>
+              </template>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slds-listbox_selection-group">
+      <ul class="slds-listbox slds-listbox_horizontal sld-grid slds-wrap" role="listbox" aria-label="Selected Options:" aria-orientation="horizontal">
+        <template if:true={value}>
+          <template for:each={value} for:item="item">
+            <li class="slds-listbox-item" role="presentation" key={item.value}>
+              <span class="slds-pill" role="option" tabindex="0" aria-selected="true" data-id={item.value}>
+                <span class="slds-pill__label" style="padding: 0.3rem;">{item.label}</span>
+                <button onclick={removeOption} data-value={item.value} style="padding: unset; border: unset; background-color: inherit;">
+                <span class="slds-icon_container slds-pill__remove slds-align_absolute-center" title="Remove">
+                  <svg class="slds-icon slds-icon_x-small slds-icon-text-default" aria-hidden="true">
+                    <use xlink:href="/_slds/icons/utility-sprite/svg/symbols.svg#close"></use>
+                  </svg>
+                </span>
+              </button>
+              </span>
+            </li>
+          </template>
+        </template>
+      </ul>
+    </div>
+  </div>
+</template>
