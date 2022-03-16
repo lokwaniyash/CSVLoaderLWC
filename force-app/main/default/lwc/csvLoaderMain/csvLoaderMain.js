@@ -35,6 +35,7 @@ export default class CsvLoaderMain extends LightningElement {
   resRecord;
   userReport1;
   successRecords;
+  reportRecords;
 
   chosen = [];
 
@@ -42,6 +43,7 @@ export default class CsvLoaderMain extends LightningElement {
   userDataSent = false;
   permGrid = false;
   importData = true;
+  batchReponse = false;
 
   @track isLoading = false;
 
@@ -184,7 +186,7 @@ export default class CsvLoaderMain extends LightningElement {
       //2nd loop will extract each column and convert it in string comma-seprated
       for (var index in arrData[i]) {
         row += '"' + arrData[i][index] + '",';
-        console.log(arrData[i][index], 'd1');
+        console.log(arrData[i][index], "d1");
       }
       row.slice(0, row.length - 1);
       //add a line break after each row
@@ -253,6 +255,13 @@ export default class CsvLoaderMain extends LightningElement {
   navToPermComp() {
     this.userDataSent = false;
     this.permGrid = true;
+  }
+
+  navToPermGridReport(event) {
+    console.log(event.detail, "rec");
+    this.reportRecords = event.detail;
+    this.permGrid = false;
+    this.batchResponse = true;
   }
 
   handleCols(row) {
@@ -347,13 +356,13 @@ export default class CsvLoaderMain extends LightningElement {
             newObj["index"] = index;
             newObj["error"] = JSON.parse(result[user]);
             newObj["status"] = newObj.error.length > 0 ? "ERROR" : "SUCCESS";
-            if(newObj.status == "SUCCESS") {
+            if (newObj.status == "SUCCESS") {
               this.successRecords.push(newObj);
             }
             let errorString = newObj.error.length > 0 ? "" : "ALL GOOD!";
             newObj.error.forEach((error, index) => {
               // let str = `(${index + 1}) `;
-              let str = '';
+              let str = "";
               str += error.statusCode + ", ";
               str += error.message;
               errorString += str + "\n";
@@ -366,11 +375,11 @@ export default class CsvLoaderMain extends LightningElement {
 
           console.log(this.resRecord, "postRes1");
 
-          for(let i = 0; i < this.resRecord.length; i++) {
-            for(let j = 0; j < profNames.length; j++) {
+          for (let i = 0; i < this.resRecord.length; i++) {
+            for (let j = 0; j < profNames.length; j++) {
               delete this.resRecord[i].ProfileId;
 
-              this.resRecord[i]['ProfileName'] = profNames[j];
+              this.resRecord[i]["ProfileName"] = profNames[j];
             }
           }
 
@@ -390,7 +399,7 @@ export default class CsvLoaderMain extends LightningElement {
             mode: "dismissable"
           });
           this.dispatchEvent(evt);
-        })
+        });
     }
   }
 }

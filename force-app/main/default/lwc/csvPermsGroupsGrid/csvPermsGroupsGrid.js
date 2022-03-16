@@ -26,7 +26,10 @@ export default class CsvPermsGroupsGrid extends LightningElement {
   selectedGroups = {};
   colors = {};
 
-  permSetReport = [];
+  // permSetReport = [];
+  // groupSetReport = [];
+  totalReport = {};
+  totalReportRecords = [];
 
   @track copyModal = false;
   isTrue = true;
@@ -35,14 +38,14 @@ export default class CsvPermsGroupsGrid extends LightningElement {
   subscription = {};
   @api channelName = "/event/BatchUserUpdated__e";
 
-
   @wire(getPermSets)
   wiredPermSets({ error, data }) {
     if (data) {
       this.error = undefined;
       console.log(data, "permData");
       data.forEach((record) => {
-        var randomColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+        var randomColor =
+          "#" + Math.floor(Math.random() * 16777215).toString(16);
         this.colors[record.Id] = randomColor;
         this.permOptions.push({
           label: record.Label,
@@ -140,7 +143,42 @@ export default class CsvPermsGroupsGrid extends LightningElement {
     this.copyPerms = event.detail;
   }
 
+  findLabelFromPermId(permId) {
+    let found = false;
+    let label = "";
+    this.tempPermOptions.forEach((permOption) => {
+      if (found) return;
+      if (permOption.value == permId) {
+        found = true;
+        label = permOption.label;
+      }
+    });
+    return label;
+  }
+
+  findLabelFromGroupId(groupId) {
+    let found = false;
+    let label = "";
+    this.tempGroupOptions.forEach((groupOption) => {
+      if (found) return;
+      if (groupOption.value == groupId) {
+        found = true;
+        label = groupOption.label;
+      }
+    });
+    return label;
+  }
+
+  navToReport() {
+    this.dispatchEvent(
+      new CustomEvent("next", {
+        detail: this.totalReportRecords
+      })
+    );
+  }
+
   updateRecords() {
+    this.dispatchEvent(new CustomEvent("loading"));
     // console.log(this.selectedGroups, this.selectedPerms);
     let groups = Object.keys(this.selectedGroups);
     let perms = Object.keys(this.selectedPerms);
@@ -183,50 +221,132 @@ export default class CsvPermsGroupsGrid extends LightningElement {
   handleSubscribe() {
     // Callback invoked whenever a new event message is received
     const messageCallback = (response) => {
-      console.log("New message received: ", JSON.stringify(response));  
+      console.log("New message received: ", JSON.stringify(response));
       // Response contains the payload of the new message received
-      let wasSuccessful = Boolean(response.data.payload.isSuccessful__c);
-      if(!wasSuccessful) {
-        // Proccess and fetch successful users that got the 
+      // let wasSuccessful = Boolean(response.data.payload.isSuccessful__c);
+      let wasSuccessful = false;
+      if (!wasSuccessful) {
+        // Proccess and fetch successful users that got the
         let permUsers = [];
-        Object.keys(this.selectedPerms).forEach(key => {
-          this.selectedPerms[key].forEach(perm => {
+        Object.keys(this.selectedPerms).forEach((key) => {
+          this.selectedPerms[key].forEach((perm) => {
             permUsers.push(perm.AssigneeId);
-          })
+          });
         });
         console.log(permUsers);
-        checkUpdatedUsersPerm({userIds: permUsers}).then(res => {
-          console.log(res, 'successPerms');
-          
-          Object.keys(this.selectedPerms).forEach(key => {
+        checkUpdatedUsersPerm({ userIds: permUsers }).then((res) => {
+          this.permSetReport = [];
+          console.log(res, "successPerms");
+
+          Object.keys(this.selectedPerms).forEach((key) => {
             let index = key;
-            let currRecord, found = false;
-            this.records.forEach(record => {
-              if(found) return;
-              if(record.index == index) {
-                currRecord = record;
+            let currRecord = {},
+              found = false,
+              failedPerms = "";
+            this.records.forEach((record) => {
+              if (found) return;
+              if (record.index == index) {
+                currRecord = JSON.parse(JSON.stringify(record));
                 found = true;
               }
             });
 
-            this.selectedPerms[key].forEach(perm => {
+            this.selectedPerms[key].forEach((perm) => {
+              let permId = perm.PermissionSetId;
+              let successful = false;
+              let label = this.findLabelFromPermId(permId);
+              res.forEach((realRec) => {
+                if (
+                  realRec.AssigneeId == currRecord.Id &&
+                  realRec.PermissionSetId == permId
+                ) {
+                  successful = true;
+                }
+              });
 
+              if (!successful) {
+                failedPerms += (failedPerms.length > 0 ? ", " : "") + label;
+              }
+              // console.log(JSON.stringify(currRecord), key);
+              // let tempRecord = JSON.parse(JSON.stringify(currRecord));
+              // tempRecord["PermissionSet"] = label;
+              // tempRecord["success"] = successful ? "Success" : "Error";
+              // console.log(JSON.stringify(tempRecord), key, permId, label);
+
+              // this.permSetReport.push(tempRecord);
+
+              currRecord["perms"] = failedPerms;
+              currRecord["groups"] = "";
             });
-          });  
-
-        })
+            this.totalReport[currRecord.Id] = currRecord;
+          });
+          console.log(this.totalReport, "rep1");
+        });
 
         // Proccess and fetch successful users that got the groups
         let groupUsers = [];
-        Object.keys(this.selectedGroups).forEach(key => {
-          this.selectedGroups[key].forEach(group => {
+        Object.keys(this.selectedGroups).forEach((key) => {
+          this.selectedGroups[key].forEach((group) => {
             groupUsers.push(group.UserOrGroupId);
-          })
+          });
         });
         console.log(groupUsers);
-        checkUpdatedUsersGroup({userIds: groupUsers}).then(res => {
-          console.log(res, 'successGroups');
-        })
+        checkUpdatedUsersGroup({ userIds: groupUsers }).then((res) => {
+          this.groupSetReport = [];
+          console.log(res, "successGroups");
+
+          Object.keys(this.selectedGroups).forEach((key) => {
+            let index = key;
+            let currRecord = {},
+              found = false,
+              failedGroups = "";
+            this.records.forEach((record) => {
+              if (found) return;
+              if (record.index == index) {
+                currRecord = JSON.parse(JSON.stringify(record));
+                found = true;
+              }
+            });
+
+            this.selectedGroups[key].forEach((group) => {
+              let groupId = group.GroupId;
+              let successful = false;
+              let label = this.findLabelFromGroupId(groupId);
+              res.forEach((realRec) => {
+                if (
+                  realRec.UserOrGroupId == currRecord.Id &&
+                  realRec.GroupId == groupId
+                ) {
+                  successful = true;
+                }
+              });
+              if (!successful) {
+                failedGroups += (failedGroups.length > 0 ? ", " : "") + label;
+              }
+              // console.log(JSON.stringify(currRecord), key);
+              // let tempRecord = JSON.parse(JSON.stringify(currRecord));
+              // tempRecord["Group"] = label;
+              // tempRecord["success"] = successful ? "Success" : "Error";
+              // console.log(JSON.stringify(tempRecord), key, groupId, label);
+
+              // this.groupSetReport.push(tempRecord);
+            });
+            if (this.totalReport[currRecord.Id] != undefined) {
+              this.totalReport[currRecord.Id]["groups"] = failedGroups;
+            } else {
+              currRecord["perms"] = "";
+              currRecord["groups"] = failedGroups;
+              this.totalReport[currRecord.Id] = currRecord;
+            }
+          });
+        });
+        console.log(this.totalReport);
+        Object.keys(this.totalReport).forEach((key) => {
+          this.totalReportRecords.push(this.totalReport[key]);
+        });
+
+        this.dispatchEvent(new CustomEvent("doneloading"));
+        this.navToReport();
       }
     };
 

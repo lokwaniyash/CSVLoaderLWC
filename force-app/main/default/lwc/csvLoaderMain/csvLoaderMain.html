@@ -1,7 +1,7 @@
 <template>
   <div class="spinner">
     <template if:true={isLoading}>
-      <div class="slds-is-relative">
+      <div class="slds-is-fixed">
       <lightning-spinner
         alternative-text="Loading"
         variant="brand"
@@ -212,6 +212,14 @@
         onloading = {handleLoading}
         ondoneloading = {handleDoneLoading}
       ></c-csv-perms-groups-grid>
+    </template>
+
+    <template if:true={batchResponse}>
+      <!-- records -->
+
+      <c-csv-batch-response-grid
+        records={reportRecords}
+      ></c-csv-batch-response-grid>
     </template>
   </lightning-card>
 </template>

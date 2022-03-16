@@ -1,0 +1,88 @@
+<template>
+  <template if:true={records}>
+    <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+      <tr class="slds-line-height_reset">
+        <th class="" scope="col">
+          <div class="slds-truncate" title="First Name">First Name</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Last Name">Last Name</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Username">Username</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Email">Email</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Alias">Alias</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Employee Id">Employee Id</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Federation Id">Federation Id</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Profile Name">Profile Name</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Permission Set(s)">Permission Set(s)</div>
+        </th>
+        <th class="" scope="col">
+          <div class="slds-truncate" title="Group(s)">Group(s)</div>
+        </th>
+      </tr>
+      <template for:each={records} for:item="record">
+        <tr key={record.Username}>
+          <td data-label="First Name">
+            <div  title={record.FirstName}>
+              {record.FirstName}
+            </div>
+          </td>
+          <td data-label="Last Name">
+            <div  title={record.LastName}>
+              {record.LastName}
+            </div>
+          </td>
+          <td data-label="Username">
+            <div  title={record.Username}>
+              {record.Username}
+            </div>
+          </td>
+          <td data-label="Email">
+            <div  title={record.Email}>{record.Email}</div>
+          </td>
+          <td data-label="Alias">
+            <div  title={record.Alias}>{record.Alias}</div>
+          </td>
+          <td data-label="Employee Number">
+            <div  title={record.EmployeeNumber}>
+              {record.EmployeeNumber}
+            </div>
+          </td>
+          <td data-label="Federation Id">
+            <div  title={record.FederationIdentifier}>
+              {record.FederationIdentifier}
+            </div>
+          </td>
+          <td data-label="ProfileId">
+            <div  title={record.ProfileId}>
+              {record.ProfileName}
+            </div>
+          </td>
+          <td data-label="Permission Set(s)">
+            <div  title={record.ProfileId}>
+              {record.perms}
+            </div>
+          </td>
+          <td data-label="Group(s)">
+            <div  title={record.ProfileId}>
+              {record.groups}
+            </div>
+          </td>
+        </tr>
+      </template>
+    </table>
+  </template>
+</template>
