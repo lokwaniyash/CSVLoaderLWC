@@ -1,19 +1,21 @@
 global class CSVLoaderBatchable implements Database.Batchable<sObject>,database.stateful {
     
     private List<sObject> dataList;
+    private List<JSON2User> userList;
     global integer totalSuccessfulRecs=0;
     global integer totalFailedRecs=0;
     global boolean successful=true;
 
-    global Map<Id, String> errorMap = new Map<Id, String>();
-    global Map<Id, SObject> IdToSObjectMap = new Map<Id, sObject>();
+    global Map<String, JSON2User> errorMap = new Map<String, JSON2User>();
+    global Map<String, SObject> IdToSObjectMap = new Map<String, sObject>();
     global Map<Id, String> successMap = new Map<Id, String>();
     global String baseURL;
     global String objType;
     
-    public CSVLoaderBatchable(List<sObject> data, String type) {
+    public CSVLoaderBatchable(List<sObject> data, String type, List<JSON2User> userRecs) {
         dataList = data;
         objType = type;
+        userList = userRecs;
     }
     
     global List<sObject> start(Database.BatchableContext BC) {
@@ -37,34 +39,74 @@ global class CSVLoaderBatchable implements Database.Batchable<sObject>,database.
             }
         }
         Integer index = 0;
-        if(objType == 'perm') {
-          List<PermissionSetAssignment> permScope = new List<PermissionSetAssignment>();
-          permScope = scope;
+        Integer mapIndex = 0;
+        // if(objType == 'perm') {
+        //   List<PermissionSetAssignment> permScope = new List<PermissionSetAssignment>();
+        //   permScope = scope;
+        //   for(Database.SaveResult dsr : myResult){
+        //     if(!dsr.isSuccess()){
+        //         String errMsg = dsr.getErrors()[0].getMessage();
+        //         errorMap.put(permScope[index].AssigneeId, errMsg);
+               
+        //     } else {
+        //         String sucMsg = baseURL + '/' + permScope[index].Id;
+        //         successMap.put(permScope[index].AssigneeId, sucMsg);
+        //     }
+        //     IdToSObjectMap.put(permScope[index].AssigneeId, permScope[index]);
+        //     index++;
+        //   }
+        // } else if(objType == 'group') {
+        //   List<GroupMember> groupScope = new List<GroupMember>();
+        //   groupScope = scope;
+        //   for(Database.SaveResult dsr : myResult){
+        //     if(!dsr.isSuccess()){
+        //         String errMsg = dsr.getErrors()[0].getMessage();
+        //         errorMap.put(groupScope[index].UserOrGroupId, errMsg);
+               
+        //     } else {
+        //         String sucMsg = baseURL + '';
+        //         successMap.put(groupScope[index].UserOrGroupId, sucMsg);
+        //     }
+        //     IdToSObjectMap.put(groupScope[index].UserOrGroupId, groupScope[index]);
+        //     index++;
+        //   }
+        // } else 
+        if(objType == 'both') {
           for(Database.SaveResult dsr : myResult){
+            String scopeId = '';
+            Boolean perm = true;
+            try {
+              scope[index].get('AssigneeId');
+            } catch (Exception e) {
+              perm = false;
+            }
+
+            if(perm) {
+              scopeId = scope[index].get('AssigneeId') + '';
+            } else {
+              scopeId = scope[index].get('UserOrGroupId') + '';
+            }
+
             if(!dsr.isSuccess()){
                 String errMsg = dsr.getErrors()[0].getMessage();
-                errorMap.put(permScope[index].AssigneeId, errMsg);
+                // errorMap.put(scopeId, errMsg);
+                System.debug(dsr.getErrors());
+                for(Database.Error err : dsr.getErrors()) {
+                  for(JSON2User user : userList) {
+                    if(scopeId == user.Id) {
+                      JSON2User errUser = user.clone();
+                      errUser.errorString = err.getMessage();
+                      errorMap.put(mapIndex++ + '', errUser);
+                      break;
+                    }
+                  }
+                }
                
             } else {
-                String sucMsg = baseURL + '/' + permScope[index].Id;
-                successMap.put(permScope[index].AssigneeId, sucMsg);
+                String sucMsg = baseURL + '/' + scopeId;
+                // successMap.put(scopeId, sucMsg);
             }
-            IdToSObjectMap.put(permScope[index].AssigneeId, permScope[index]);
-            index++;
-          }
-        } else if(objType == 'group') {
-          List<GroupMember> groupScope = new List<GroupMember>();
-          groupScope = scope;
-          for(Database.SaveResult dsr : myResult){
-            if(!dsr.isSuccess()){
-                String errMsg = dsr.getErrors()[0].getMessage();
-                errorMap.put(groupScope[index].UserOrGroupId, errMsg);
-               
-            } else {
-                String sucMsg = baseURL + '/' + groupScope[index].Id;
-                successMap.put(groupScope[index].UserOrGroupId, sucMsg);
-            }
-            IdToSObjectMap.put(groupScope[index].UserOrGroupId, groupScope[index]);
+            IdToSObjectMap.put(scopeId, scope[index]);
             index++;
           }
         }
@@ -113,13 +155,13 @@ global class CSVLoaderBatchable implements Database.Batchable<sObject>,database.
           Messaging.EmailFileAttachment[] emailAttList = new List<Messaging.EmailFileAttachment>();
           if(!errorMap.isEmpty()){
               // Creating the CSV file for error
-              String finalstr = 'Id, Name, Error \n';
+              String finalstr = 'First Name, Last Name, Username, Email, Alias, Employee Number, Federation Identifier, Profile, Error\n';
              
               String attName = 'UserErrors' + system.now().format('YYYYMMDDhhmm') + '.csv';
-              for(Id id  : errorMap.keySet()){
-                  string err = errorMap.get(id);
-                  sObject user = (sObject) IdToSObjectMap.get(id);
-                  string recordString = '"'+id+'","'+user.Id+'","'+err+'"\n';
+              for(String id  : errorMap.keySet()){
+                  JSON2User err = errorMap.get(id);
+                  // sObject user = (sObject) IdToSObjectMap.get(id);
+                  string recordString = '"'+err.FirstName+'","'+err.LastName+'","'+err.Username+'","'+err.Email+'","'+err.Alias+'","'+err.EmployeeNumber+'","'+err.FederationIdentifier+'","'+err.ProfileName+'","'+err.errorString+'"\n';
                   finalstr = finalstr +recordString;
               }
                              

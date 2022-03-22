@@ -296,7 +296,7 @@ export default class CsvLoaderMain extends LightningElement {
       }
     }
 
-    if (!flag || this.chosen.length < this._cols.length) {
+    if (!flag) {
       let msg = "";
       this.fieldsReq.forEach((field) => {
         msg += field + ", ";
@@ -308,7 +308,21 @@ export default class CsvLoaderMain extends LightningElement {
         mode: "dismissable"
       });
       this.dispatchEvent(evt);
-    } else {
+    }
+    // else if (this.chosen.length < this._cols.length) {
+    //   let msg = "";
+    //   this.fieldsReq.forEach((field) => {
+    //     msg += field + ", ";
+    //   });
+    //   const evt = new ShowToastEvent({
+    //     title: "Error",
+    //     message: `Make sure you have Matched All Columns`,
+    //     variant: "error",
+    //     mode: "dismissable"
+    //   });
+    //   this.dispatchEvent(evt);
+    // }
+    else {
       this.confirmMatch = false;
       this.isLoading = true;
 
@@ -319,20 +333,30 @@ export default class CsvLoaderMain extends LightningElement {
         console.log(row);
         // if (index == this._rows.length - 1) return;
         let userRecord = {};
+        userRecord["EmailEncodingKey"] = "ISO-8859-1";
+        userRecord["TimeZoneSidKey"] = "America/Los_Angeles";
+        userRecord["LocaleSidKey"] = "en_US";
+        userRecord["LanguageLocaleKey"] = "en_US";
         this._cols.forEach((col) => {
           console.log(col, userRecord, 1, this.currRecord);
           if (this.currRecord[col] == "ProfileId") {
             profNames.push(row[col]);
             return;
           }
-          userRecord[this.currRecord[col]] = row[col];
+
+          if (this.currRecord[col] == undefined) return;
+
+          let valToUse = row[col];
+          if (
+            valToUse.toLowerCase() == "true" ||
+            valToUse.toLowerCase() == "false"
+          ) {
+            valToUse = Boolean(valToUse);
+          }
+          userRecord[this.currRecord[col]] = valToUse;
           console.log(col, userRecord, 2);
         });
         console.log(userRecord, 4);
-        userRecord["EmailEncodingKey"] = "ISO-8859-1";
-        userRecord["TimeZoneSidKey"] = "America/Los_Angeles";
-        userRecord["LocaleSidKey"] = "en_US";
-        userRecord["LanguageLocaleKey"] = "en_US";
         // Object.assign(userRecord, this.defaults);
         console.log(userRecord, 5);
         recordList.push(userRecord);

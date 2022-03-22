@@ -6,6 +6,7 @@
         alternative-text="Loading"
         variant="brand"
         size="large"
+        class="slds-is-fixed"
       >
       </lightning-spinner>
     </div>
@@ -135,6 +136,7 @@
                   >
                     <div
                       class="custom-box slds-box slds-p-around_medium slds-text-align_center"
+                      style="word-wrap: anywhere;"
                     >
                       {match.key}
                     </div>
@@ -156,6 +158,7 @@
                   >
                     <div
                       class="custom-box slds-box slds-p-around_medium slds-text-align_center"
+                      style="word-wrap: anywhere;"
                     >
                       {match.value}
                     </div>
@@ -218,7 +221,7 @@
       <!-- records -->
 
       <c-csv-batch-response-grid
-        records={reportRecords}
+        reportrecords={reportRecords}
       ></c-csv-batch-response-grid>
     </template>
   </lightning-card>

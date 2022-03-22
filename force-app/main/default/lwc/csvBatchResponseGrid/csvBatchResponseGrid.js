@@ -1,5 +1,14 @@
-import { LightningElement, api } from "lwc";
+import { LightningElement, api, track } from "lwc";
 
 export default class CsvBatchResponseGrid extends LightningElement {
-  @api records;
+  @track records;
+
+  @api
+  get reportrecords() {
+    return records;
+  }
+  set reportrecords(recs) {
+    this.records = recs;
+    console.log(recs);
+  }
 }

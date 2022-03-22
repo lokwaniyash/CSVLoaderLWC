@@ -13,6 +13,7 @@ import checkUpdatedUsersPerm from "@salesforce/apex/csvLoaderController.checkUpd
 import checkUpdatedUsersGroup from "@salesforce/apex/csvLoaderController.checkUpdatedUsersGroup";
 import assignPermSets from "@salesforce/apex/CSVLoaderBatchableController.assignPermSets";
 import assignGroups from "@salesforce/apex/CSVLoaderBatchableController.assignGroups";
+import assignBoth from "@salesforce/apex/CSVLoaderBatchableController.assignBoth";
 
 export default class CsvPermsGroupsGrid extends LightningElement {
   @api records;
@@ -170,6 +171,7 @@ export default class CsvPermsGroupsGrid extends LightningElement {
   }
 
   navToReport() {
+    console.log(this.totalReportRecords, "tr");
     this.dispatchEvent(
       new CustomEvent("next", {
         detail: this.totalReportRecords
@@ -185,6 +187,8 @@ export default class CsvPermsGroupsGrid extends LightningElement {
 
     let insertGroups = [];
     let insertPerms = [];
+    let permPara = "[]";
+    let groupPara = "[]";
     if (groups.length > 0) {
       groups.forEach((key) => {
         // insertGroups.push(this.selectedGroups[key]);
@@ -192,9 +196,9 @@ export default class CsvPermsGroupsGrid extends LightningElement {
           insertGroups.push(val);
         });
       });
-      let para = JSON.stringify(insertGroups);
-      console.log(para);
-      assignGroups({ groupDataString: para });
+      groupPara = JSON.stringify(insertGroups);
+      // console.log(para);
+      // assignGroups({ groupDataString: para });
     }
 
     if (perms.length > 0) {
@@ -204,10 +208,21 @@ export default class CsvPermsGroupsGrid extends LightningElement {
           insertPerms.push(val);
         });
       });
-      let para = JSON.stringify(insertPerms);
-      console.log(para);
-      assignPermSets({ permissionSetDataString: para });
+      permPara = JSON.stringify(insertPerms);
+      // console.log(para);
+      // assignPermSets({ permissionSetDataString: para });
     }
+
+    let sendRec = this.records.map((rec) => {
+      console.log(JSON.stringify(rec), "map");
+      return JSON.stringify(rec);
+    });
+    console.log(JSON.parse(JSON.stringify(sendRec)));
+    assignBoth({
+      permDataString: permPara,
+      groupDataString: groupPara,
+      records: sendRec
+    });
   }
 
   registerErrorListener() {
@@ -220,7 +235,7 @@ export default class CsvPermsGroupsGrid extends LightningElement {
 
   handleSubscribe() {
     // Callback invoked whenever a new event message is received
-    const messageCallback = (response) => {
+    const messageCallback = async (response) => {
       console.log("New message received: ", JSON.stringify(response));
       // Response contains the payload of the new message received
       // let wasSuccessful = Boolean(response.data.payload.isSuccessful__c);
@@ -234,7 +249,7 @@ export default class CsvPermsGroupsGrid extends LightningElement {
           });
         });
         console.log(permUsers);
-        checkUpdatedUsersPerm({ userIds: permUsers }).then((res) => {
+        await checkUpdatedUsersPerm({ userIds: permUsers }).then((res) => {
           this.permSetReport = [];
           console.log(res, "successPerms");
 
@@ -281,6 +296,9 @@ export default class CsvPermsGroupsGrid extends LightningElement {
             this.totalReport[currRecord.Id] = currRecord;
           });
           console.log(this.totalReport, "rep1");
+          return new Promise((resolve) => {
+            resolve();
+          });
         });
 
         // Proccess and fetch successful users that got the groups
@@ -291,7 +309,7 @@ export default class CsvPermsGroupsGrid extends LightningElement {
           });
         });
         console.log(groupUsers);
-        checkUpdatedUsersGroup({ userIds: groupUsers }).then((res) => {
+        await checkUpdatedUsersGroup({ userIds: groupUsers }).then((res) => {
           this.groupSetReport = [];
           console.log(res, "successGroups");
 
@@ -339,14 +357,18 @@ export default class CsvPermsGroupsGrid extends LightningElement {
               this.totalReport[currRecord.Id] = currRecord;
             }
           });
+          console.log(this.totalReport, "rep2");
+          return new Promise((resolve) => {
+            resolve();
+          });
         });
-        console.log(this.totalReport);
         Object.keys(this.totalReport).forEach((key) => {
           this.totalReportRecords.push(this.totalReport[key]);
         });
 
         this.dispatchEvent(new CustomEvent("doneloading"));
         this.navToReport();
+        // console.log(this.totalReport);
       }
     };
 

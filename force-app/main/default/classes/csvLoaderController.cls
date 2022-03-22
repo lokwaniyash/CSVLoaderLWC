@@ -31,7 +31,7 @@ public with sharing class csvLoaderController {
       List<User> userList = (List<User>)System.JSON.deserializeStrict(userDataString, List<User>.Class);
       List<String> profIds = new List<String>();
       // Map<String, String> profMap = new Map<String, String>();
-      List<Profile> profFromDB = [SELECT Id, Name FROM Profile Where Name IN :profNames WITH SECURITY_ENFORCED];
+      List<Profile> profFromDB = [SELECT Id, Name FROM Profile Where Name IN :profNames OR Id IN :profNames];
       System.debug(profNames);
       System.debug(profFromDB);
       for(Profile p : profFromDB) {
@@ -43,7 +43,7 @@ public with sharing class csvLoaderController {
       for(Integer i = 0; i < userList.size(); i++) {
         System.debug(userList[i]);
         for(Profile prof : profFromDB) {
-          if(profNames[i].toLowercase() == prof.Name.toLowercase()) {
+          if(profNames[i].toLowercase() == prof.Name.toLowercase() || profNames[i] == prof.Id) {
             userList[i].ProfileId = prof.Id;
             break;
           }
